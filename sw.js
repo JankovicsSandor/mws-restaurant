@@ -4,13 +4,13 @@ self.addEventListener("install", function(event) {
   event.waitUntil(
     caches.open(staticCacheName).then(function(cache) {
       return cache.addAll([
-        "http://localhost:81/mws-restaurant-stage-1-master/",
-        "http://localhost:81/mws-restaurant-stage-1-master/css/styles.css",
-        "http://localhost:81/mws-restaurant-stage-1-master/data/restaurants.json",
-        "http://localhost:81/mws-restaurant-stage-1-master/js/dbhelper.js",
-        "http://localhost:81/mws-restaurant-stage-1-master/js/main.js",
-        "http://localhost:81/mws-restaurant-stage-1-master/js/restaurant_info.js",
-        "http://localhost:81/mws-restaurant-stage-1-master/img/"
+        "http://localhost:8000/",
+        "http://localhost:8000/css/styles.css",
+        "http://localhost:8000/data/restaurants.json",
+        "http://localhost:8000/js/dbhelper.js",
+        "http://localhost:8000/js/main.js",
+        "http://localhost:8000/js/restaurant_info.js",
+        "http://localhost:8000/img/"
       ]);
     })
   );
