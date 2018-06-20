@@ -1,6 +1,7 @@
 /**
  * Common database helper functions.
  */
+
 class DBHelper {
   /**
    * Database URL.
@@ -15,6 +16,7 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static async fetchRestaurants(callback) {
+    var db;
     let xhr = new XMLHttpRequest();
     xhr.open("GET", DBHelper.DATABASE_URL);
     xhr.onload = () => {
@@ -23,6 +25,31 @@ class DBHelper {
         const json = JSON.parse(xhr.responseText);
         const restaurants = json;
         callback(null, restaurants);
+
+        var idb = window.indexedDB;
+        var dbPromise = idb.open("database", 1);
+        dbPromise.onupgradeneeded = function(e) {
+          db = e.target.result;
+          console.log("running onupgradeneeded");
+          if (!db.objectStoreNames.contains("restaurants")) {
+            var storeOS = db.createObjectStore("restaurants", {
+              keyPath: "name"
+            });
+          }
+        };
+        dbPromise.onsuccess = function(e) {
+          console.log("running onsuccess");
+          db = e.target.result;
+          var transaction = db.transaction(["restaurants"], "readwrite");
+          var store = transaction.objectStore("restaurants");
+          json.forEach(function(request) {
+            store.put(request);
+          });
+        };
+        dbPromise.onerror = function(e) {
+          console.log("onerror!");
+          console.dir(e);
+        };
       } else {
         // Oops!. Got an error from server.
         const error = `Request failed. Returned status of ${xhr.status}`;
@@ -31,7 +58,6 @@ class DBHelper {
     };
     xhr.send();
   }
-
   /**
    * Fetch a restaurant by its ID.
    */
