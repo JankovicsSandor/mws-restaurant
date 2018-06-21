@@ -12,9 +12,11 @@ self.addEventListener("install", function(event) {
         "js/dbhelper.js",
         "js/main.js",
         "js/restaurant_info.js",
+        "restaurants/"
       ]);
     })
   );
+  console.log("install");
 });
 self.addEventListener("activate", function(event) {
   event.waitUntil(
@@ -35,8 +37,10 @@ self.addEventListener("activate", function(event) {
   );
 });
 self.addEventListener("fetch", function(event) {
+  console.log(event);
   var requestUrl = new URL(event.request.url);
   if (requestUrl.origin === location.origin) {
+    debugger;
     if (requestUrl.pathname === "/") {
       event.respondWith(caches.match("/index.html"));
       return;
@@ -58,7 +62,7 @@ self.addEventListener("fetch", function(event) {
 
 function servePhoto(request) {
   var storageUrl = request.url;
-
+  console.log(storageUrl);
   return caches.open(contentImgsCache).then(function(cache) {
     return cache.match(storageUrl).then(function(response) {
       if (response) return response;

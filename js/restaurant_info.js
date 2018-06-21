@@ -5,7 +5,7 @@ var contentMarginTop=0;
 var mainContent;
 
 /**
- * Initialize Google map, called from HTML.nemtom mi van
+ * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
   fetchRestaurantFromURL((error, restaurant) => {

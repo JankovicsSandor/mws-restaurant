@@ -9,10 +9,6 @@ document.addEventListener("DOMContentLoaded", event => {
   fetchNeighborhoods();
   fetchCuisines();
 });
-self.addEventListener("fetch", function(event) {
-  console.log("alma");
-  console.log(event.request);
-});
 /**
  * Fetch all neighborhoods and set their HTML.
  */
@@ -134,10 +130,12 @@ resetRestaurants = restaurants => {
  */
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
   const ul = document.getElementById("restaurants-list");
-  restaurants.forEach(restaurant => {
-    ul.append(createRestaurantHTML(restaurant));
-  });
-  addMarkersToMap();
+  if (restaurants != null) {
+    restaurants.forEach(restaurant => {
+      ul.append(createRestaurantHTML(restaurant));
+    });
+    addMarkersToMap();
+  }
 };
 
 /**

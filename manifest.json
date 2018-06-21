@@ -1,0 +1,36 @@
+{
+  "short_name": "Restaurant",
+  "name": "RestaurantReviewer",
+  "icons": [
+    {
+      "src": "/img/1.jpg",
+      "type": "image/jpg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/img/2.jpg",
+      "type": "image/jpg",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/img/3.jpg",
+      "type": "image/jpg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/img/4.jpg",
+      "type": "image/jpg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/img/5.jpg",
+      "type": "image/jpg",
+      "sizes": "192x192"
+    }   
+  ],
+  "start_url": "/index.html",
+  "background_color": "#317EFB",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#317EFB"
+}
