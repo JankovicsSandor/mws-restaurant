@@ -140,7 +140,7 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        // Get all neighborhoods from all restaurants
+        // Get all neighborhoods from all restaurants objects
         const neighborhoods = restaurants.map(
           (v, i) => restaurants[i].neighborhood
         );
