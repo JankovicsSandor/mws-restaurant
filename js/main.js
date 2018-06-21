@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", event => {
   fetchCuisines();
 });
 self.addEventListener("fetch", function(event) {
+  console.log("alma");
   console.log(event.request);
 });
 /**

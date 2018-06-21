@@ -1,6 +1,36 @@
 /**
  * Common database helper functions.
  */
+var resultData;
+function addImage(data) {
+  var db;
+  resultData = data;
+  console.log(data);
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("database", 1);
+  dbPromise.onupgradeneeded = function(e) {
+    db = e.target.result;
+    console.log("running onupgradeneeded");
+    if (!db.objectStoreNames.contains("restaurants")) {
+      var storeOS = db.createObjectStore("restaurants", {
+        keyPath: "id"
+      });
+    }
+  };
+  dbPromise.onsuccess = function(e) {
+    console.log("running onsuccess");
+    db = e.target.result;
+    var transaction = db.transaction(["restaurants"], "readwrite");
+    var store = transaction.objectStore("restaurants");
+    data.forEach(function(request) {
+      store.put(request);
+    });
+  };
+  dbPromise.onerror = function(e) {
+    console.log("onerror!");
+    console.dir(e);
+  };
+}
 
 class DBHelper {
   /**
@@ -16,47 +46,10 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static async fetchRestaurants(callback) {
-    var db;
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json;
-        callback(null, restaurants);
-
-        var idb = window.indexedDB;
-        var dbPromise = idb.open("database", 1);
-        dbPromise.onupgradeneeded = function(e) {
-          db = e.target.result;
-          console.log("running onupgradeneeded");
-          if (!db.objectStoreNames.contains("restaurants")) {
-            var storeOS = db.createObjectStore("restaurants", {
-              keyPath: "name"
-            });
-          }
-        };
-        dbPromise.onsuccess = function(e) {
-          console.log("running onsuccess");
-          db = e.target.result;
-          var transaction = db.transaction(["restaurants"], "readwrite");
-          var store = transaction.objectStore("restaurants");
-          json.forEach(function(request) {
-            store.put(request);
-          });
-        };
-        dbPromise.onerror = function(e) {
-          console.log("onerror!");
-          console.dir(e);
-        };
-      } else {
-        // Oops!. Got an error from server.
-        const error = `Request failed. Returned status of ${xhr.status}`;
-        callback(error, null);
-      }
-    };
-    xhr.send();
+    fetch(DBHelper.DATABASE_URL)
+      .then(response => response.json())
+      .then(addImage)
+      .then(callback(null, resultData));
   }
   /**
    * Fetch a restaurant by its ID.
@@ -170,12 +163,16 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
-        // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter(
-          (v, i) => cuisines.indexOf(v) == i
-        );
-        callback(null, uniqueCuisines);
+        if (restaurants != null) {
+          const cuisines = restaurants.map(
+            (v, i) => restaurants[i].cuisine_type
+          );
+          // Remove duplicates from cuisines
+          const uniqueCuisines = cuisines.filter(
+            (v, i) => cuisines.indexOf(v) == i
+          );
+          callback(null, uniqueCuisines);
+        }
       }
     });
   }
