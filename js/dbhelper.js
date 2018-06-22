@@ -1,11 +1,11 @@
 /**
  * Common database helper functions.
  */
+
 var resultData;
 function addImage(data) {
   var db;
   resultData = data;
-  console.log(data);
   var idb = window.indexedDB;
   var dbPromise = idb.open("database", 1);
   dbPromise.onupgradeneeded = function(e) {
@@ -31,6 +31,7 @@ function addImage(data) {
     console.dir(e);
   };
 }
+var result = [];
 
 class DBHelper {
   /**
@@ -45,11 +46,15 @@ class DBHelper {
   /**
    * Fetch all restaurants.
    */
+
   static async fetchRestaurants(callback) {
     fetch(DBHelper.DATABASE_URL)
       .then(response => response.json())
       .then(addImage)
-      .then(callback(null, resultData));
+      .then(callback(null, resultData))
+      .catch(function(error) {
+        console.log(error);
+      });
   }
   /**
    * Fetch a restaurant by its ID.
@@ -60,13 +65,15 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        const restaurant = restaurants.find(r => r.id == id);
-        if (restaurant) {
-          // Got the restaurant
-          callback(null, restaurant);
-        } else {
-          // Restaurant does not exist in the database
-          callback("Restaurant does not exist", null);
+        if (restaurants != null) {
+          const restaurant = restaurants.find(r => r.id == id);
+          if (restaurant) {
+            // Got the restaurant
+            callback(null, restaurant);
+          } else {
+            // Restaurant does not exist in the database
+            callback("Restaurant does not exist", null);
+          }
         }
       }
     });
