@@ -1,7 +1,7 @@
 let restaurant;
 var map;
 var tabindex = 6;
-var contentMarginTop=0;
+var contentMarginTop = 0;
 var mainContent;
 
 /**
@@ -18,7 +18,7 @@ window.initMap = () => {
         center: restaurant.latlng,
         scrollwheel: false
       });
-      google.maps.event.addListener(self.map,'tilesloaded',function(){
+      google.maps.event.addListener(self.map, "tilesloaded", function() {
         console.log(document.getElementById("map-container").style);
       });
 
@@ -26,9 +26,25 @@ window.initMap = () => {
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
     }
   });
-  self.mainContent=document.getElementById("map-container");
+  self.mainContent = document.getElementById("map-container");
   console.log(self.mainContent.clientHeight);
- // self.mainContent.setAttribute("margin-top",(self.map.offsetHeight+10)+" px")
+  // self.mainContent.setAttribute("margin-top",(self.map.offsetHeight+10)+" px")
+};
+
+window.addEventListener("load", function() {
+  this.registerServiceWorker();
+});
+
+registerServiceWorker = function() {
+  if (!navigator.serviceWorker) return;
+  navigator.serviceWorker
+    .register("./sw.js")
+    .then(function(registration) {
+      console.log("Registration worked", registration.scope);
+    })
+    .catch(function() {
+      console.log("Registration failed");
+    });
 };
 
 /**
@@ -115,7 +131,10 @@ fillRestaurantHoursHTML = (
     row.appendChild(time);
 
     hours.appendChild(row);
-    row.setAttribute("aria-label", "Open on"+day.innerHTML + " " + time.innerHTML);
+    row.setAttribute(
+      "aria-label",
+      "Open on" + day.innerHTML + " " + time.innerHTML
+    );
   }
 };
 
@@ -163,7 +182,7 @@ createReviewHTML = review => {
   const comments = document.createElement("p");
   comments.innerHTML = review.comments;
   li.appendChild(comments);
-  li.setAttribute("tabindex",this.tabindex);
+  li.setAttribute("tabindex", this.tabindex);
   this.tabindex++;
   return li;
 };

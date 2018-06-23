@@ -39,12 +39,13 @@ self.addEventListener("activate", function(event) {
 self.addEventListener("fetch", function(event) {
   var requestUrl = new URL(event.request.url);
   if (requestUrl.pathname.startsWith("/restaurants/")) {
-    console.log("medve");
-    var databaseResult=serveFromDatabase(event.request)
-    event.respondWith(databaseResult);
-    return;
-  }
+      console.log("medve");
+      var databaseResult = serveFromDatabase(event.request);
+      event.respondWith(fetch(event.request));
+      return;
+    }
   if (requestUrl.origin === location.origin) {
+  
     if (requestUrl.pathname.startsWith("/img/")) {
       event.respondWith(servePhoto(event.request));
       return;
@@ -81,11 +82,6 @@ function serveFromDatabase(request) {
 
         cursore.continue();
       } else {
-        // Undefined cursor. This means either no objects found,
-        // or no next object found
-        // Do not call cursor.continue(); in this else branch because
-        // there are no more objects over which to iterate.
-        // Coincidentally, this also means we are done iterating.
         console.log("Finished iterating");
       }
     };

@@ -47,7 +47,7 @@ class DBHelper {
    * Fetch all restaurants.
    */
 
-  static async fetchRestaurants(callback) {
+  static fetchRestaurants(callback) {
     fetch(DBHelper.DATABASE_URL)
       .then(response => response.json())
       .then(addImage)
