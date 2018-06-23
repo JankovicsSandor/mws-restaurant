@@ -41,7 +41,7 @@ self.addEventListener("fetch", function(event) {
   if (requestUrl.pathname.startsWith("/restaurants/")) {
       console.log("medve");
       var databaseResult = serveFromDatabase(event.request);
-      event.respondWith(fetch(event.request));
+      event.respondWith(databaseResult);
       return;
     }
   if (requestUrl.origin === location.origin) {
