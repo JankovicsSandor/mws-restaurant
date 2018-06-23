@@ -38,14 +38,8 @@ self.addEventListener("activate", function(event) {
 
 self.addEventListener("fetch", function(event) {
   var requestUrl = new URL(event.request.url);
-  if (requestUrl.pathname.startsWith("/restaurants/")) {
-      console.log("medve");
-      var databaseResult = serveFromDatabase(event.request);
-      event.respondWith(databaseResult);
-      return;
-    }
+
   if (requestUrl.origin === location.origin) {
-  
     if (requestUrl.pathname.startsWith("/img/")) {
       event.respondWith(servePhoto(event.request));
       return;
@@ -59,44 +53,7 @@ self.addEventListener("fetch", function(event) {
     })
   );
 });
-var result = [];
-function serveFromDatabase(request) {
-  var database = indexedDB.open("database", 1);
 
-  database.onsuccess = function() {
-    var db = database.result;
-    var query = db
-      .transaction("restaurants", "readonly")
-      .objectStore("restaurants");
-
-    var cursor = query.openCursor();
-    cursor.onsuccess = function(event) {
-      var cursore = event.target.result;
-
-      if (cursore) {
-        var value = cursore.value;
-        var inArray = checkIfInArray(value.name);
-        if (inArray == false) {
-          result.push(value);
-        }
-
-        cursore.continue();
-      } else {
-        console.log("Finished iterating");
-      }
-    };
-  };
-  return result;
-}
-
-function checkIfInArray(value) {
-  for (let object of result) {
-    if (object.name == value) {
-      return true;
-    }
-  }
-  return false;
-}
 function servePhoto(request) {
   var storageUrl = request.url;
   return caches.open(contentImgsCache).then(function(cache) {

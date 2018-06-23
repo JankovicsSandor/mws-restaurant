@@ -128,7 +128,7 @@ resetRestaurants = restaurants => {
 /**
  * Create all restaurants HTML and add them to the webpage.
  */
-fillRestaurantsHTML = (restaurants = self.restaurants) => {
+function fillRestaurantsHTML(restaurants = self.restaurants) {
   const ul = document.getElementById("restaurants-list");
   if (restaurants != null) {
     restaurants.forEach(restaurant => {
@@ -136,12 +136,12 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
     });
     addMarkersToMap();
   }
-};
+}
 
 /**
  * Create restaurant HTML.
  */
-createRestaurantHTML = restaurant => {
+function createRestaurantHTML(restaurant) {
   const li = document.createElement("li");
 
   const image = document.createElement("img");
@@ -168,12 +168,12 @@ createRestaurantHTML = restaurant => {
   li.append(more);
 
   return li;
-};
+}
 
 /**
  * Add markers for current restaurants to the map.
  */
-addMarkersToMap = (restaurants = self.restaurants) => {
+function addMarkersToMap(restaurants = self.restaurants) {
   restaurants.forEach(restaurant => {
     // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
@@ -182,7 +182,7 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     });
     self.markers.push(marker);
   });
-};
+}
 
 window.addEventListener("load", function() {
   this.registerServiceWorker();
