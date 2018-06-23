@@ -11,7 +11,8 @@ self.addEventListener("install", function(event) {
         "css/styles.css",
         "js/dbhelper.js",
         "js/main.js",
-        "js/restaurant_info.js"
+        "js/restaurant_info.js",
+        "/manifest.json"
       ]);
     })
   );
@@ -38,7 +39,18 @@ self.addEventListener("activate", function(event) {
 
 self.addEventListener("fetch", function(event) {
   var requestUrl = new URL(event.request.url);
+  if (requestUrl.pathname === "/") {
+    var test = caches.match("/index.html").then(function(response) {
+      if (response) return response;
 
+      return fetch(requestUrl).then(function(networkResponse) {
+        cache.put(requestUrl, networkResponse.clone());
+        return networkResponse;
+      });
+    });
+    event.respondWith(test);
+    return;
+  }
   if (requestUrl.origin === location.origin) {
     if (requestUrl.pathname.startsWith("/img/")) {
       event.respondWith(servePhoto(event.request));

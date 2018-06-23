@@ -60,11 +60,28 @@ class DBHelper {
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
+    var idb = window.indexedDB;
+    var dbPromise = idb.open("database", 1);
+    dbPromise.onsuccess = function() {
+      console.log("running onsuccess");
+      var db = dbPromise.result;
+      var query = db
+        .transaction(["restaurants"], "readwrite")
+        .objectStore("restaurants");
+      var cursor = query.openCursor();
+      cursor.onsuccess = function(event) {
+        var actual = event.target.result;
+        if (actual) {
+          if (actual.value.id == id) {
+            callback(null, actual.value);
+          }
+          actual.continue();
+        } else {
+          console.log("finito");
+        }
+      };
+    };
     // fetch all restaurants with proper error handling.
-    fetch(DBHelper.DATABASE_URL + id).then(function(response) {
-      response = response.json;
-      callback(null, response);
-    });
   }
 
   /**
