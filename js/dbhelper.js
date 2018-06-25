@@ -30,6 +30,15 @@ function addImage(data) {
     console.log("onerror!");
     console.dir(e);
   };
+  var reviewsDbPromise = idb.open("reviews", 2);
+  reviewsDbPromise.onupgradeneeded = function(e) {
+    var revDatabase = e.target.result;
+    if (!revDatabase.objectStoreNames.contains("reviews")) {
+      var storeOS = revDatabase.createObjectStore("reviews", {
+        keyPath: "id"
+      });
+    }
+  };
 }
 var result = [];
 
@@ -40,7 +49,7 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants/`;
+    return `http://localhost:${port}/`;
   }
 
   /**
@@ -48,7 +57,7 @@ class DBHelper {
    */
 
   static fetchRestaurants(callback) {
-    fetch(DBHelper.DATABASE_URL)
+    fetch(DBHelper.DATABASE_URL + "restaurants/")
       .then(response => response.json())
       .then(addImage)
       .then(callback(null, resultData))

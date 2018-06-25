@@ -3,7 +3,7 @@ var map;
 var tabindex = 6;
 var contentMarginTop = 0;
 var mainContent;
-
+var restaurantReview;
 /**
  * Initialize Google map, called from HTML.
  */
@@ -77,7 +77,7 @@ fetchRestaurantFromURL = callback => {
 /**
  * Create restaurant HTML and add it to the webpage
  */
-fillRestaurantHTML = (restaurant = self.restaurant) => {
+function fillRestaurantHTML(restaurant = self.restaurant) {
   const name = document.getElementById("restaurant-name");
   name.setAttribute(
     "aria-label",
@@ -107,10 +107,51 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
+  getReviews();
   // fill reviews
   fillReviewsHTML();
-};
+}
 
+function getReviews() {
+  fetch(DBHelper.DATABASE_URL + "reviews?restaurant_id=" + self.restaurant.id)
+    .then(response => response.json())
+    .then(uploadResult)
+    .catch(function(error) {
+      console.log(error);
+    });
+}
+
+function uploadResult(data) {
+  var db;
+  restaurantReview = data;
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("database", 1);
+  dbPromise.onsuccess = function(e) {
+    db = e.target.result;
+    var reviewsDbPromise = idb.open("reviews", 2);
+    reviewsDbPromise.onupgradeneeded = function(e) {
+      var revDatabase = e.target.result;
+      if (!revDatabase.objectStoreNames.contains("reviews")) {
+        var storeOS = revDatabase.createObjectStore("reviews", {
+          keyPath: "id"
+        });
+      }
+    };
+    reviewsDbPromise.onsuccess = function(e) {
+      console.log("running onsuccess");
+      db = e.target.result;
+      var transaction = db.transaction(["reviews"], "readwrite");
+      var store = transaction.objectStore("reviews");
+      data.forEach(function(request) {
+        store.put(request);
+      });
+    };
+    reviewsDbPromise.onerror = function(e) {
+      console.log("onerror!");
+      console.dir(e);
+    };
+  };
+}
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.
  */
@@ -141,25 +182,44 @@ fillRestaurantHoursHTML = (
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
-  const container = document.getElementById("reviews-container");
-  const title = document.createElement("h3");
-  title.innerHTML = "Reviews";
-  title.setAttribute("aria-label", title.innerHTML);
-  container.appendChild(title);
+fillReviewsHTML = (reviews = (restaurantReview = [])) => {
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("reviews");
+  dbPromise.onsuccess = function(e) {
+    console.log("running onsuccess");
+    var db = e.target.result;
+    var query = db.transaction(["reviews"], "readwrite").objectStore("reviews");
+    var cursor = query.openCursor();
+    cursor.onsuccess = function(event) {
+      var actual = event.target.result;
+      if (actual) {
+        if (actual.value.restaurant_id == self.restaurant.id) {
+          reviews.push(actual.value);
+        }
+        actual.continue();
+      } else {
+        //End readeing the database start visualizing
+        const container = document.getElementById("reviews-container");
+        const title = document.createElement("h3");
+        title.innerHTML = "Reviews";
+        title.setAttribute("aria-label", title.innerHTML);
+        container.appendChild(title);
 
-  if (!reviews) {
-    const noReviews = document.createElement("p");
-    noReviews.innerHTML = "No reviews yet!";
-    container.appendChild(noReviews);
-    container.setAttribute("aria-label", noReviews.innerHTML);
-    return;
-  }
-  const ul = document.getElementById("reviews-list");
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
-  container.appendChild(ul);
+        if (!reviews) {
+          const noReviews = document.createElement("p");
+          noReviews.innerHTML = "No reviews yet!";
+          container.appendChild(noReviews);
+          container.setAttribute("aria-label", noReviews.innerHTML);
+          return;
+        }
+        const ul = document.getElementById("reviews-list");
+        reviews.forEach(review => {
+          ul.appendChild(createReviewHTML(review));
+        });
+        container.appendChild(ul);
+      }
+    };
+  };
 };
 
 /**
@@ -171,9 +231,23 @@ createReviewHTML = review => {
   name.innerHTML = review.name;
   li.appendChild(name);
 
-  const date = document.createElement("p");
-  date.innerHTML = review.date;
-  li.appendChild(date);
+  const datep = document.createElement("p");
+  var date = new Date(review.createdAt);
+  var year = date.getUTCFullYear();
+  var month = date.getMonth();
+  var day = date.getDate();
+  // Hours part from the timestamp
+  var hours = date.getHours();
+  // Minutes part from the timestamp
+  var minutes = "0" + date.getMinutes();
+  // Seconds part from the timestamp
+  var seconds = "0" + date.getSeconds();
+
+  // Will display time in 10:30:23 format
+  var formattedTime =year +"/" + month + "/" + day + " " + hours + ":" + minutes.substr(-2) + ":" + seconds.substr(-2);
+  datep.innerHTML = formattedTime;
+
+  li.appendChild(datep);
 
   const rating = document.createElement("p");
   rating.innerHTML = `Rating: ${review.rating}`;
@@ -209,3 +283,28 @@ getParameterByName = (name, url) => {
   if (!results[2]) return "";
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 };
+
+document.getElementById("submit").addEventListener("click", function(event) {
+  var name = document.getElementsByClassName("name")[0].value;
+  var rating = document.getElementsByClassName("rating")[0].value;
+  var review = document.getElementsByClassName("review")[0].value;
+
+  if (name && rating && review) {
+    var send = {
+      restaurant_id: self.restaurant.id,
+      name: name,
+      rating: rating,
+      comments: review
+    };
+    fetch(DBHelper.DATABASE_URL + "reviews/", {
+      method: "POST",
+      body: JSON.stringify(send)
+    })
+      .then(response => response.json())
+      .then(addToDatabase);
+  }
+});
+
+function addToDatabase(data) {
+  console.log(data);
+}

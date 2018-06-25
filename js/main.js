@@ -166,7 +166,7 @@ function createRestaurantHTML(restaurant) {
   more.innerHTML = "View Details";
   more.href = DBHelper.urlForRestaurant(restaurant);
   li.append(more);
-
+  
   return li;
 }
 
