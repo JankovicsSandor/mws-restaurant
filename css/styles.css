@@ -292,8 +292,8 @@ nav h1 a {
   width: 90%;
 }
 
-#restaurant-container,
 #form-container,
+#restaurant-container,
 #reviews-container {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
@@ -302,6 +302,7 @@ nav h1 a {
   margin-right: auto;
   width: 80%;
 }
+
 #form-container,
 #reviews-container {
   padding: 30px 40px 80px;
@@ -345,8 +346,8 @@ nav h1 a {
     flex-wrap: wrap;
   }
 
-  #restaurant-container,
   #form-container,
+  #restaurant-container,
   #reviews-container {
     width: 100%;
     margin: auto;
@@ -435,4 +436,10 @@ nav h1 a {
     margin: 0;
     width: auto;
   }
+}
+
+.heart {
+  font-size: 45px !important;
+  color: red;
+  margin: 0 5% 2% 10%;
 }

@@ -244,7 +244,18 @@ createReviewHTML = review => {
   var seconds = "0" + date.getSeconds();
 
   // Will display time in 10:30:23 format
-  var formattedTime =year +"/" + month + "/" + day + " " + hours + ":" + minutes.substr(-2) + ":" + seconds.substr(-2);
+  var formattedTime =
+    year +
+    "/" +
+    month +
+    "/" +
+    day +
+    " " +
+    hours +
+    ":" +
+    minutes.substr(-2) +
+    ":" +
+    seconds.substr(-2);
   datep.innerHTML = formattedTime;
 
   li.appendChild(datep);
@@ -296,12 +307,23 @@ document.getElementById("submit").addEventListener("click", function(event) {
       rating: rating,
       comments: review
     };
-    fetch(DBHelper.DATABASE_URL + "reviews/", {
-      method: "POST",
-      body: JSON.stringify(send)
-    })
-      .then(response => response.json())
-      .then(addToDatabase);
+    if (window.navigator.onLine) {
+      fetch(DBHelper.DATABASE_URL + "reviews/", {
+        method: "POST",
+        body: JSON.stringify(send)
+      })
+        .then(response => response.json())
+        .then(addToDatabase);
+    } else {
+      var pendingReview = {
+        url: DBHelper.DATABASE_URL + "reviews/",
+        method: "POST",
+        body: JSON.stringify(send)
+      };
+      caches.open("pending").then(function(cache) {
+        cache.put(pendingReview);
+      });
+    }
   }
 });
 

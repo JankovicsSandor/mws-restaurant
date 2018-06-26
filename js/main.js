@@ -166,8 +166,81 @@ function createRestaurantHTML(restaurant) {
   more.innerHTML = "View Details";
   more.href = DBHelper.urlForRestaurant(restaurant);
   li.append(more);
-  
+
+  const favourite = document.createElement("span");
+  favourite.id = "hearth";
+  if (restaurant.is_favorite == "false") {
+    favourite.className = "heart fa fa-heart-o";
+  } else {
+    favourite.className = "heart fa fa-heart";
+  }
+  favourite.onclick = function(element) {
+    if (element.toElement.classList.contains("fa-heart-o")) {
+      //Add to favorite
+      fetch(
+        DBHelper.DATABASE_URL +
+          "restaurants/" +
+          restaurant.id +
+          "?is_favorite=true",
+        {
+          method: "PUT"
+        }
+      )
+        .then(response => response.json())
+        .then(updateDatabase)
+        .then(function(e) {
+          element.toElement.classList.remove("fa-heart-o");
+          element.toElement.classList.add("fa-heart");
+        });
+    } else {
+      //remove from  favorite
+      fetch(
+        DBHelper.DATABASE_URL +
+          "restaurants/" +
+          restaurant.id +
+          "?is_favorite=false",
+        {
+          method: "PUT"
+        }
+      )
+        .then(response => response.json())
+        .then(updateDatabase)
+        .then(function(e) {
+          element.toElement.classList.remove("fa-heart");
+          element.toElement.classList.add("fa-heart-o");
+        });
+    }
+  };
+  li.append(favourite);
+
   return li;
+}
+
+function updateDatabase(data) {
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("database", 1);
+  dbPromise.onsuccess = function() {
+    console.log("running onsuccess");
+    var db = dbPromise.result;
+    var query = db
+      .transaction(["restaurants"], "readwrite")
+      .objectStore("restaurants");
+    var cursor = query.openCursor();
+    cursor.onsuccess = function(event) {
+      var actual = event.target.result;
+      if (actual) {
+        if (actual.value.id == data.id) {
+          var request = actual.update(data);
+          request.onsuccess = function() {
+            console.log("updated");
+          };
+        }
+        actual.continue();
+      } else {
+        console.log("finito");
+      }
+    };
+  };
 }
 
 /**
@@ -199,3 +272,53 @@ registerServiceWorker = function() {
       console.log("Registration failed");
     });
 };
+
+function showFavourites() {
+  let favoriteRestaurants = [];
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("database", 1);
+  dbPromise.onsuccess = function() {
+    console.log("running onsuccess");
+    var db = dbPromise.result;
+    var query = db
+      .transaction(["restaurants"], "readwrite")
+      .objectStore("restaurants");
+    var cursor = query.openCursor();
+    cursor.onsuccess = function(event) {
+      var actual = event.target.result;
+      if (actual) {
+        if (actual.value.is_favorite == "true") {
+          favoriteRestaurants.push(actual.value);
+        }
+        actual.continue();
+      } else {
+        resetRestaurants(favoriteRestaurants);
+        fillRestaurantsHTML(favoriteRestaurants);
+      }
+    };
+  };
+}
+
+function showAll() {
+  let allRestaurants = [];
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("database", 1);
+  dbPromise.onsuccess = function() {
+    console.log("running onsuccess");
+    var db = dbPromise.result;
+    var query = db
+      .transaction(["restaurants"], "readwrite")
+      .objectStore("restaurants");
+    var cursor = query.openCursor();
+    cursor.onsuccess = function(event) {
+      var actual = event.target.result;
+      if (actual) {
+        allRestaurants.push(actual.value);
+        actual.continue();
+      } else {
+        resetRestaurants(allRestaurants);
+        fillRestaurantsHTML(allRestaurants);
+      }
+    };
+  };
+}

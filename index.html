@@ -8,6 +8,7 @@
   <title>Restaurant Reviews</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#317EFB" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
@@ -34,6 +35,8 @@
         <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
           <option value="all">All Cuisines</option>
         </select>
+        <button id="favourite-button" onclick="showFavourites()">Show only favorite restaurants</button>
+        <button id="favourite-button" onclick="showAll()">Show all restaurants</button>
       </div>
       <ul id="restaurants-list"></ul>
     </section>

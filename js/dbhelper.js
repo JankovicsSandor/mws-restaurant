@@ -1,8 +1,29 @@
 /**
  * Common database helper functions.
  */
-
 var resultData;
+async function retriveFromDb() {
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("database", 1);
+  dbPromise.onsuccess = function() {
+    console.log("running onsuccess");
+    var db = dbPromise.result;
+    var query = db
+      .transaction(["restaurants"], "readwrite")
+      .objectStore("restaurants");
+    var cursor = query.openCursor();
+    cursor.onsuccess = function(event) {
+      var actual = event.target.result;
+      if (actual) {
+        resultData.push(actual.value);
+        actual.continue();
+      } else {
+        return resultData;
+      }
+    };
+  };
+}
+
 function addImage(data) {
   var db;
   resultData = data;
@@ -63,8 +84,10 @@ class DBHelper {
       .then(callback(null, resultData))
       .catch(function(error) {
         console.log(error);
+        //retriveFromDb().then(callback(null, resultData));
       });
   }
+
   /**
    * Fetch a restaurant by its ID.
    */

@@ -12,7 +12,8 @@ self.addEventListener("install", function(event) {
         "js/dbhelper.js",
         "js/main.js",
         "js/restaurant_info.js",
-        "/manifest.json"
+        "/manifest.json",
+        "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
       ]);
     })
   );
