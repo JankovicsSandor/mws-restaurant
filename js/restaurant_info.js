@@ -320,13 +320,72 @@ document.getElementById("submit").addEventListener("click", function(event) {
         method: "POST",
         body: JSON.stringify(send)
       };
-      caches.open("pending").then(function(cache) {
-        cache.put(pendingReview.url, pendingReview);
-      });
+      var db;
+      var idb = window.indexedDB;
+      var dbPromise = idb.open("pending", 3);
+      dbPromise.onsuccess = function(e) {
+        console.log("running onsuccess");
+        db = e.target.result;
+        var transaction = db.transaction(["pending"], "readwrite");
+        var store = transaction.objectStore("pending");
+        store.put(pendingReview);
+      };
+      dbPromise.onerror = function(e) {
+        console.log("onerror!");
+        console.log(e);
+      };
     }
   }
 });
 
 function addToDatabase(data) {
-  console.log(data);
+  var db;
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("reviews", 3);
+  dbPromise.onsuccess = function(e) {
+    console.log("running onsuccess");
+    db = e.target.result;
+    var transaction = db.transaction(["reviews"], "readwrite");
+    var store = transaction.objectStore("reviews");
+    store.put(data);
+  };
+  dbPromise.onerror = function(e) {
+    console.log("onerror!");
+    console.log(e);
+  };
 }
+
+window.addEventListener("online", function() {
+  var db;
+  var idb = window.indexedDB;
+  var dbPromise = idb.open("pending", 3);
+  dbPromise.onsuccess = function(e) {
+    console.log("running onsuccess");
+    db = e.target.result;
+    var transaction = db.transaction(["pending"], "readwrite");
+    var store = transaction.objectStore("pending");
+    var cursor = store.openCursor();
+    cursor.onsuccess = function(event) {
+      var actual = event.target.result;
+      if (actual) {
+        fetch(actual.value.url, {
+          method: actual.value.method,
+          body: actual.value.body
+        })
+          .then(response => response.json())
+          .then(addToDatabase)
+          .catch(function(error) {
+            console.log(error);
+          });
+        actual.delete();
+        actual.continue();
+      } else {
+        console.log("finito");
+      }
+    };
+  };
+  dbPromise.onerror = function(e) {
+    console.log("onerror!");
+    console.log(e);
+  };
+});

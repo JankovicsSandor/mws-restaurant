@@ -60,6 +60,15 @@ function addImage(data) {
       });
     }
   };
+  var pendingDbPromise = idb.open("pending", 3);
+  pendingDbPromise.onupgradeneeded = function(e) {
+    var penDatabase = e.target.result;
+    if (!penDatabase.objectStoreNames.contains("pending")) {
+      var storeOS = penDatabase.createObjectStore("pending", {
+        autoIncrement: true
+      });
+    }
+  };
 }
 var result = [];
 
