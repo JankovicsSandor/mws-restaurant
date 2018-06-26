@@ -321,7 +321,7 @@ document.getElementById("submit").addEventListener("click", function(event) {
         body: JSON.stringify(send)
       };
       caches.open("pending").then(function(cache) {
-        cache.put(pendingReview);
+        cache.put(pendingReview.url, pendingReview);
       });
     }
   }
